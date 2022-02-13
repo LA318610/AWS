@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: 2010-09-09
+	Description: 'AWS CloudFormation Sample Template EC2Instance with Ubuntu 18 LTS'
+		"Parameters": 
+		{
+		"KeyName":{
+			"Description":"Name of an existing EC2 KeyPair to enable SSH access to the instance",
+			"Type": "AWS::EC2::KeyPair::KeyName",
+			"ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+				  },
+		"InstanceType": {
+			"Description": EC2 instance type,
+			"Type": "String",
+			"Default": t2.nano
+			"AllowedValues": [
+								"t1.micro",
+								"t2.nano"
+							],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+                        },
+		
+		"SSHLocation": 
+			{
+				"Description": "The IP address range that can be used to SSH to the EC2 instances",
+				"Type": "String",
+				"MinLength": "9",
+				"MaxLength": "18",
+				"Default": "0.0.0.0/0",
+				"AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+				"ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+			}
+			
+		 "AMI": {
+            "Default": "ami-0e6b0a17afac0450f",
+            "Description": "The Amazon Ubuntu AMI",
+            "Type": "String"
+        },
+		},
+		
+		
+		"Mappings":{
+		"AWSInstanceType2Arch": {
+								"t1.micro": {
+								"Arch": "HVM64"
+								},
+								"t2.nano": {
+								"Arch": "HVM64"
+									}
+								},
+								
+		"AWSRegionArch2AMI": {
+								"ap-south-1": {
+								"HVM64": "ami-0e6b0a17afac0450f",
+								//"HVMG2": "ami-0aeb704d503081ea6"
+								},
+								
+								"ap-southeast-1": {
+								"HVM64": "ami-0ab74209e4e1d892d",
+								//"HVMG2": "ami-0fe84a5b4563d8f27"
+      },
+	  
+	 "Resources": {
+     "EC2InstanceSample": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "InstanceSecurityGroup"
+          }
+        ],
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "ImageId": {
+          "ImageId": {
+                    "Ref": "AMI"
+                },
+        }
+      }
+    },
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable SSH access via port 22",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            }
+          }
+        ]
+      }
+    },
+   "random-bucket-assignment": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {},
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "578de650-9ae7-4a2d-8caa-6ebc5990a94b"
+        }
+      },
+      "DependsOn": [
+        "EC2Instance"
+      ]
+    }
+  },
+  "Outputs": {
+    "InstanceId": {
+      "Description": "InstanceId of the newly created EC2 instance",
+      "Value": {
+        "Ref": "EC2Instance"
+      }
+    },
+    }
+	
